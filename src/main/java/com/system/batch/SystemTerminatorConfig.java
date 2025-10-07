@@ -27,15 +27,15 @@ public class SystemTerminatorConfig {
     }
 
     @Bean
-    public Step terminationStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, Tasklet terminatorTasklet) {
+    public Step terminationStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, Tasklet sysTemTerminatorTasklet) {
         return new StepBuilder("terminationStep", jobRepository)
-            .tasklet(terminatorTasklet, transactionManager)
+            .tasklet(sysTemTerminatorTasklet, transactionManager)
             .build();
     }
 
     @Bean
     @StepScope
-    public Tasklet terminatorTasklet(
+    public Tasklet sysTemTerminatorTasklet(
         @Value("#{jobParameters['terminatorId']}") String terminatorId,
         @Value("#{jobParameters['targetCount']}") Integer targetCount
     ) {
