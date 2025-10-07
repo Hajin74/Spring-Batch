@@ -33,9 +33,9 @@ public class TerminatorConfig {
     }
 
     @Bean
-    public Step terminatorStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, Tasklet terminatorEnumTasklet) {
+    public Step terminatorStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, Tasklet terminatorPOJOTasklet) {
         return new StepBuilder("terminatorStep", jobRepository)
-            .tasklet(terminatorEnumTasklet, transactionManager)
+            .tasklet(terminatorPOJOTasklet, transactionManager)
             .build();
     }
 
@@ -95,5 +95,33 @@ public class TerminatorConfig {
 
     public enum QuestDifficulty {
         EASY, NORMAL, HARD, EXTREME
+    }
+
+    @Bean
+    @StepScope
+    public Tasklet terminatorPOJOTasklet(SystemInfiltrationParameters infiltrationParams) {
+        return (contribution, chunkContext) -> {
+            log.info("===== ⚔️ 시스템 침투 작전 초기화! =====");
+            log.info("===== 임무 코드네임: {} =====", infiltrationParams.getMissionName());
+            log.info("===== 보안 레벨: {} =====", infiltrationParams.getSecurityLevel());
+            log.info("===== 작전 지휘관: {} =====", infiltrationParams.getOperationCommander());
+
+            int baseTime = 60;
+            int multiplier = switch (infiltrationParams.getSecurityLevel()) {
+                case 1 -> 1; // 저보안
+                case 2 -> 2; // 중보안
+                case 3 -> 4; // 고보안
+                case 4 -> 8; // 최고 보안
+                default -> 1;
+            };
+
+            int totalTime = baseTime * multiplier;
+
+            log.info("===== 💥 시스템 해킹 난이도 분석 중... =====");
+            log.info("===== 🕒 예상 침투 시간: {}분 =====", totalTime);
+            log.info("===== 🏆 시스템 장악 준비 완료! =====");
+
+            return RepeatStatus.FINISHED;
+        };
     }
 }
