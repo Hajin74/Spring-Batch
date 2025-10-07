@@ -1,5 +1,7 @@
 package com.system.batch;
 
+import static com.system.batch.TerminatorConfig.QuestDifficulty.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,9 +33,9 @@ public class TerminatorConfig {
     }
 
     @Bean
-    public Step terminatorStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, Tasklet terminatorTasklet) {
+    public Step terminatorStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, Tasklet terminatorEnumTasklet) {
         return new StepBuilder("terminatorStep", jobRepository)
-            .tasklet(terminatorTasklet, transactionManager)
+            .tasklet(terminatorEnumTasklet, transactionManager)
             .build();
     }
 
@@ -62,5 +64,36 @@ public class TerminatorConfig {
 
             return RepeatStatus.FINISHED;
         };
+    }
+
+    @Bean
+    @StepScope
+    public Tasklet terminatorEnumTasklet(
+        @Value("#{jobParameters['questDifficulty']}") QuestDifficulty questDifficulty
+    ) {
+        return (contribution, chunkContext) -> {
+            log.info("===== ⚔️ 시스템 침투 작전 개시! =====");
+            log.info("===== 임무 난이도: {} ===== ", questDifficulty);
+
+            int baseReward = 100;
+            int rewardMultiplier = switch (questDifficulty) {
+                case EASY -> 1;
+                case NORMAL -> 2;
+                case HARD -> 3;
+                case EXTREME -> 5;
+            };
+
+            int totalReward = baseReward * rewardMultiplier;
+
+            log.info("===== 💥 시스템 해킹 진행 중... =====");
+            log.info("===== 🏆 시스템 장악 완료! =====");
+            log.info("===== 💰 획득한 시스템 리소스: {} 메가바이트 =====", totalReward);
+
+            return  RepeatStatus.FINISHED;
+        };
+    }
+
+    public enum QuestDifficulty {
+        EASY, NORMAL, HARD, EXTREME
     }
 }
